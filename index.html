@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<title>Rack Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --felt: #2F6B4F;
+    --rail: #D9A441;
+    --rail-soft: #f2dca8;
+    --ink: #16241C;
+    --ink-soft: #4d5f54;
+    --bg: #FAF9F3;
+    --surface: #FFFFFF;
+    --surface-sunken: #F1EFE4;
+    --line: #E4E1D1;
+    --linden: #2B6CB0;
+    --linden-soft: #dbe9f7;
+    --malachi: #0BB050;
+    --malachi-soft: #d7f5e2;
+    --shadow: rgba(22, 36, 28, 0.08);
+    --radius-lg: 22px;
+    --radius-md: 14px;
+    --radius-sm: 9px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --felt: #3a8562; --rail: #e8b654; --rail-soft: #4a3d1f;
+      --ink: #ECEAE0; --ink-soft: #b9c2b7; --bg: #14201A; --surface: #1C2A22;
+      --surface-sunken: #16211B; --line: #2c3b31; --linden: #6FA8DC;
+      --linden-soft: #223447; --malachi: #4CD97B; --malachi-soft: #1c3a28;
+      --shadow: rgba(0, 0, 0, 0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --felt: #3a8562; --rail: #e8b654; --rail-soft: #4a3d1f;
+    --ink: #ECEAE0; --ink-soft: #b9c2b7; --bg: #14201A; --surface: #1C2A22;
+    --surface-sunken: #16211B; --line: #2c3b31; --linden: #6FA8DC;
+    --linden-soft: #223447; --malachi: #4CD97B; --malachi-soft: #1c3a28;
+    --shadow: rgba(0, 0, 0, 0.35);
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; min-height: 100%; }
+  body { display: flex; justify-content: center; }
+  .app { width: 100%; max-width: 480px; padding: 0 14px 110px; }
+  h1, h2, .display { font-family: 'Fredoka', sans-serif; font-weight: 600; margin: 0; }
+
+  /* Top bar */
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 18px 2px 16px; }
+  .topbar-eyebrow { font-size: 12.5px; color: var(--ink-soft); display: block; margin-bottom: 2px; }
+  .topbar h1 { font-size: 24px; color: var(--felt); letter-spacing: -0.01em; }
+  @media (prefers-color-scheme: dark) { .topbar h1 { color: var(--rail); } }
+  :root[data-theme="dark"] .topbar h1 { color: var(--rail); }
+  .menu-btn { width: 40px; height: 40px; border-radius: 50%; border: none; background: var(--surface);
+    box-shadow: 0 2px 8px var(--shadow); font-size: 20px; color: var(--ink-soft); cursor: pointer; }
+
+  /* Views */
+  .view { display: none; }
+  .view.active { display: block; animation: viewIn 0.25s ease; }
+  @keyframes viewIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  .card { background: var(--surface); border-radius: var(--radius-lg); padding: 18px; margin-top: 12px;
+    box-shadow: 0 4px 14px var(--shadow); border: 1px solid var(--line); }
+  .card h2 { font-size: 16px; margin-bottom: 14px; }
+
+  /* Profile cards (home) */
+  .profile-card { display: flex; align-items: center; gap: 14px; background: var(--surface);
+    border-radius: 20px; padding: 16px; box-shadow: 0 4px 14px var(--shadow); border: 1px solid var(--line);
+    margin-bottom: 10px; position: relative; overflow: hidden; transition: transform 0.3s ease; }
+  .profile-card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--accent); }
+  .profile-card.pulse { animation: cardPulse 0.6s ease; }
+  @keyframes cardPulse { 0% { transform: scale(1); } 35% { transform: scale(1.02); } 100% { transform: scale(1); } }
+
+  .ring { width: 78px; height: 78px; border-radius: 50%; padding: 7px; flex-shrink: 0; }
+  .ring-inner { width: 100%; height: 100%; border-radius: 50%; background: var(--surface);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .ring-inner .pct { font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 18px; }
+  .ring-inner .lbl { font-size: 9px; color: var(--ink-soft); margin-top: 1px; }
+
+  .profile-info { flex: 1; min-width: 0; }
+  .profile-name-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .profile-name { font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 17px; }
+  .streak-badge { font-size: 11px; background: var(--rail-soft); color: #7a4e0e; padding: 2px 8px;
+    border-radius: 999px; font-weight: 700; }
+  :root[data-theme="dark"] .streak-badge { color: var(--rail); }
+  @media (prefers-color-scheme: dark) { .streak-badge { color: var(--rail); } }
+  .profile-stats { font-size: 12.5px; color: var(--ink-soft); margin-top: 3px; }
+
+  .hero-banner { width: 100%; display: flex; align-items: center; gap: 14px; padding: 18px;
+    border-radius: var(--radius-lg); border: none; cursor: pointer; margin-top: 12px; text-align: left;
+    background: linear-gradient(135deg, var(--felt), #1c3a2a); color: #fff;
+    box-shadow: 0 8px 20px var(--shadow); transition: transform 0.1s ease; }
+  .hero-banner:active { transform: scale(0.98); }
+  .hero-play { width: 44px; height: 44px; flex-shrink: 0; border-radius: 50%; background: rgba(255,255,255,0.18);
+    display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .hero-text { display: flex; flex-direction: column; gap: 2px; }
+  .hero-title { font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 16px; }
+  .hero-sub { font-size: 12px; color: rgba(255,255,255,0.75); }
+
+  .rank-note { font-size: 11.5px; color: var(--ink-soft); text-align: center; margin: 10px 4px 0; line-height: 1.5; }
+
+  /* Highlights */
+  .highlight-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .highlight-tile { background: var(--surface-sunken); border-radius: 16px; padding: 12px; }
+  .highlight-tile .h-icon { font-size: 19px; }
+  .highlight-tile .h-label { font-size: 10.5px; color: var(--ink-soft); font-weight: 700; margin: 5px 0 3px; }
+  .highlight-tile .h-value { font-size: 12.5px; font-weight: 600; line-height: 1.4; }
+
+  .home-cta { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .home-cta-text { font-size: 13px; color: var(--ink-soft); }
+  .home-cta-text span { font-family: 'Fredoka', sans-serif; font-size: 18px; color: var(--felt); font-weight: 600; }
+  @media (prefers-color-scheme: dark) { .home-cta-text span { color: var(--rail); } }
+  :root[data-theme="dark"] .home-cta-text span { color: var(--rail); }
+
+  /* Buttons */
+  .log-btn { padding: 13px 18px; border-radius: var(--radius-md); border: none; background: var(--felt);
+    color: #fff; font-family: 'Fredoka', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer;
+    transition: transform 0.1s ease, opacity 0.15s ease; white-space: nowrap; }
+  .log-btn.full { width: 100%; }
+  .log-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .log-btn:not(:disabled):active { transform: scale(0.98); }
+
+  /* Winner + ball pickers */
+  .field-label { font-size: 13px; font-weight: 600; color: var(--ink-soft); margin-bottom: 10px; }
+  .winner-picker { display: flex; gap: 10px; margin-bottom: 18px; }
+  .winner-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 8px;
+    border-radius: var(--radius-md); border: 2px solid var(--line); background: var(--surface-sunken);
+    cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px; color: var(--ink-soft);
+    transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease; }
+  .winner-btn:active { transform: scale(0.97); }
+  .winner-btn .mini-ball { width: 26px; height: 26px; border-radius: 50%; color: #fff; display: flex;
+    align-items: center; justify-content: center; font-size: 12px; font-family: 'Fredoka', sans-serif; }
+  .winner-btn[data-player="linden"].selected { border-color: var(--linden); background: var(--linden-soft); color: var(--linden); }
+  .winner-btn[data-player="malachi"].selected { border-color: var(--malachi); background: var(--malachi-soft); color: var(--malachi); }
+  .winner-btn[data-player="linden"] .mini-ball { background: var(--linden); }
+  .winner-btn[data-player="malachi"] .mini-ball { background: radial-gradient(circle at 50% 50%, #fff 0 22%, transparent 23%), var(--malachi); }
+
+  .ball-picker { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
+  .ball-opt { aspect-ratio: 1; border-radius: 50%; border: 2px solid var(--line); background: var(--surface-sunken);
+    display: flex; align-items: center; justify-content: center; font-family: 'Fredoka', sans-serif; font-weight: 600;
+    font-size: 16px; color: var(--ink-soft); cursor: pointer; transition: border-color 0.15s ease, transform 0.1s ease, background 0.15s ease; }
+  .ball-opt:active { transform: scale(0.94); }
+  .ball-opt.selected { border-color: var(--rail); background: var(--rail-soft); color: var(--ink); transform: scale(1.05); }
+
+  .note-input { width: 100%; padding: 12px; border-radius: var(--radius-md); border: 1.5px solid var(--line);
+    background: var(--surface-sunken); color: var(--ink); font-family: 'Inter', sans-serif; font-size: 14px;
+    margin-bottom: 16px; }
+  .note-input:focus { outline: none; border-color: var(--felt); }
+  .note-input::placeholder { color: var(--ink-soft); opacity: 0.7; }
+
+  /* Trends */
+  .chip-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .chip { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface-sunken);
+    font-size: 13px; font-weight: 600; color: var(--ink-soft); cursor: pointer; font-family: 'Inter', sans-serif; }
+  .chip.active { background: var(--felt); color: #fff; border-color: var(--felt); }
+  .chart-wrap { position: relative; height: 220px; }
+  .trend-summary { display: flex; gap: 10px; margin-top: 14px; }
+  .trend-chip { flex: 1; background: var(--surface-sunken); border-radius: 14px; padding: 10px; text-align: center; }
+  .trend-chip .name { font-size: 12px; font-weight: 600; color: var(--ink-soft); }
+  .trend-chip .rec { font-family: 'Fredoka', sans-serif; font-size: 16px; font-weight: 600; margin-top: 2px; }
+
+  /* History */
+  .history-list { display: flex; flex-direction: column; gap: 8px; }
+  .history-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px; background: var(--surface-sunken); border-radius: var(--radius-sm); }
+  .history-row .mini-ball { width: 24px; height: 24px; border-radius: 50%; color: #fff; display: flex;
+    align-items: center; justify-content: center; font-size: 11px; font-family: 'Fredoka', sans-serif; flex-shrink: 0; margin-top: 1px; }
+  .history-row .text { flex: 1; font-size: 13.5px; }
+  .history-row .text strong { font-weight: 700; }
+  .history-row .note { display: block; font-size: 12px; color: var(--ink-soft); font-style: italic; margin-top: 2px; }
+  .history-row .date { font-size: 11.5px; color: var(--ink-soft); white-space: nowrap; margin-top: 1px; }
+  .history-row .del { background: none; border: none; color: var(--ink-soft); font-size: 16px; cursor: pointer; padding: 2px 4px; line-height: 1; }
+  .history-row .del:hover { color: #c0392b; }
+
+  .empty-state { text-align: center; padding: 26px 10px; color: var(--ink-soft); font-size: 13.5px; }
+  .empty-state .big { font-size: 26px; margin-bottom: 6px; display: block; }
+
+  /* Bottom nav */
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: center;
+    background: var(--surface); border-top: 1px solid var(--line); z-index: 50;
+    padding-bottom: env(safe-area-inset-bottom, 0); }
+  .bottom-nav-inner { display: flex; width: 100%; max-width: 480px; }
+  .nav-btn { flex: 1; background: none; border: none; padding: 10px 4px 8px; display: flex; flex-direction: column;
+    align-items: center; gap: 3px; font-size: 11px; font-weight: 600; color: var(--ink-soft); cursor: pointer;
+    font-family: 'Inter', sans-serif; }
+  .nav-btn .nav-icon { font-size: 19px; }
+  .nav-btn.active { color: var(--felt); }
+  @media (prefers-color-scheme: dark) { .nav-btn.active { color: var(--rail); } }
+  :root[data-theme="dark"] .nav-btn.active { color: var(--rail); }
+
+  /* Sheet */
+  .sheet-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 90; opacity: 0;
+    pointer-events: none; transition: opacity 0.2s ease; }
+  .sheet-backdrop.show { opacity: 1; pointer-events: auto; }
+  .sheet { position: fixed; left: 0; right: 0; bottom: 0; background: var(--surface); border-radius: 22px 22px 0 0;
+    padding: 10px 16px calc(20px + env(safe-area-inset-bottom, 0)); z-index: 91; transform: translateY(100%);
+    transition: transform 0.25s ease; box-shadow: 0 -8px 24px var(--shadow); }
+  .sheet.show { transform: translateY(0); }
+  .sheet-handle { width: 36px; height: 4px; background: var(--line); border-radius: 999px; margin: 6px auto 12px; }
+  .sheet-item { display: block; width: 100%; text-align: left; padding: 14px 8px; background: none; border: none;
+    border-bottom: 1px solid var(--line); font-size: 15px; font-family: 'Inter', sans-serif; font-weight: 600;
+    color: var(--ink); cursor: pointer; }
+  .sheet-item:last-child { border-bottom: none; }
+  .sheet-item.danger { color: #c0392b; }
+
+  /* League intro overlay */
+  .intro-overlay { position: fixed; inset: 0; background: radial-gradient(circle at 50% 28%, #234f3a, #05100a 78%);
+    z-index: 200; display: flex; align-items: center; justify-content: center; color: #fff; overflow: hidden; }
+  .intro-overlay.hidden { display: none; }
+  .intro-progress { position: absolute; top: 0; left: 0; right: 0; height: 4px; background: rgba(255,255,255,0.15); }
+  .intro-progress-bar { height: 100%; background: var(--rail); width: 0%; }
+  .intro-skip { position: absolute; top: 18px; right: 18px; background: rgba(255,255,255,0.14); border: none;
+    color: #fff; padding: 8px 14px; border-radius: 999px; font-size: 12.5px; cursor: pointer; font-family: 'Inter', sans-serif; }
+  .intro-stage { text-align: center; padding: 0 28px; max-width: 420px; animation: introFade 0.5s ease; }
+  @keyframes introFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .intro-title { font-family: 'Fredoka', sans-serif; font-size: 14px; letter-spacing: 0.04em; color: var(--rail); margin-bottom: 10px; }
+  .intro-big { font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 42px; margin: 6px 0; line-height: 1.15; }
+  .intro-sub { font-size: 14px; color: rgba(255,255,255,0.75); line-height: 1.5; }
+  .intro-race { display: flex; flex-direction: column; gap: 18px; margin-top: 6px; }
+  .race-row { text-align: left; }
+  .race-row .race-label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+  .race-track { height: 14px; border-radius: 999px; background: rgba(255,255,255,0.14); overflow: hidden; }
+  .race-fill { height: 100%; border-radius: 999px; width: 0%; transition: width 1.8s cubic-bezier(.22,.85,.32,1); }
+  .intro-crown { font-size: 48px; animation: crownDrop 0.8s cubic-bezier(.34,1.56,.64,1); margin-bottom: 4px; }
+  @keyframes crownDrop { from { transform: translateY(-60px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .confetti-ball { position: absolute; top: -20px; width: 12px; height: 12px; border-radius: 50%;
+    animation: confettiFall linear forwards; }
+  @keyframes confettiFall { to { transform: translateY(115vh) rotate(360deg); opacity: 0.9; } }
+
+  .toast { position: fixed; bottom: 86px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-size: 13px;
+    font-weight: 600; opacity: 0; transition: opacity 0.25s ease, transform 0.25s ease; pointer-events: none;
+    z-index: 20; white-space: nowrap; max-width: 90vw; overflow: hidden; text-overflow: ellipsis; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div>
+      <span class="topbar-eyebrow">Season Tracker</span>
+      <h1>Rack Tracker</h1>
+    </div>
+    <button class="menu-btn" id="menu-btn" aria-label="Menu">⋯</button>
+  </div>
+
+  <!-- HOME -->
+  <section class="view active" data-view="home">
+    <button class="hero-banner" id="hero-intro-btn" type="button">
+      <span class="hero-play">▶</span>
+      <span class="hero-text">
+        <span class="hero-title">Watch the League Intro</span>
+        <span class="hero-sub">A 30-second recap of the season so far</span>
+      </span>
+    </button>
+    <div id="home-profiles"></div>
+    <div class="rank-note">Ranked by win % — ties go to whoever leaves fewer balls on the table when they win.</div>
+    <div class="card">
+      <h2>Season highlights</h2>
+      <div class="highlight-grid">
+        <div class="highlight-tile" id="tile-best">
+          <div class="h-icon">🎯</div>
+          <div class="h-label">Most dominant win</div>
+          <div class="h-value">Log a game to see your best win.</div>
+        </div>
+        <div class="highlight-tile" id="tile-worst">
+          <div class="h-icon">🤏</div>
+          <div class="h-label">Closest match</div>
+          <div class="h-value">Log a game to see your closest match.</div>
+        </div>
+      </div>
+    </div>
+    <div class="card home-cta">
+      <div class="home-cta-text"><span id="home-total-games">0</span><br>games this season</div>
+      <button class="log-btn" id="home-log-btn">Log a game</button>
+    </div>
+  </section>
+
+  <!-- LOG -->
+  <section class="view" data-view="log">
+    <div class="card">
+      <h2>Log a game</h2>
+      <div class="field-label">Who won?</div>
+      <div class="winner-picker">
+        <button class="winner-btn" data-player="linden" type="button">
+          <span class="mini-ball">2</span>Linden
+        </button>
+        <button class="winner-btn" data-player="malachi" type="button">
+          <span class="mini-ball">13</span>Malachi
+        </button>
+      </div>
+      <div class="field-label" id="balls-label">How many balls did they have left?</div>
+      <div class="ball-picker" id="ball-picker"></div>
+      <div class="field-label">Note (optional)</div>
+      <input type="text" id="note-input" class="note-input" maxlength="60" placeholder="e.g. break-and-run, nail-biter...">
+      <button class="log-btn full" id="log-btn" disabled>Log game</button>
+    </div>
+  </section>
+
+  <!-- TRENDS -->
+  <section class="view" data-view="trends">
+    <div class="card">
+      <h2>Standing trends</h2>
+      <div class="chip-row" id="range-chips">
+        <button class="chip" data-range="week">Week</button>
+        <button class="chip active" data-range="month">Month</button>
+        <button class="chip" data-range="year">Year</button>
+        <button class="chip" data-range="all">Season</button>
+      </div>
+      <div class="chart-wrap"><canvas id="trends-chart"></canvas></div>
+      <div class="empty-state" id="trends-empty" style="display:none;">
+        <span class="big">📈</span>No games logged in this range yet.
+      </div>
+      <div class="trend-summary" id="trend-summary"></div>
+    </div>
+  </section>
+
+  <!-- HISTORY -->
+  <section class="view" data-view="history">
+    <div class="card">
+      <h2>Match history</h2>
+      <div class="history-list" id="history-list"></div>
+    </div>
+  </section>
+
+</div>
+
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <button class="nav-btn active" data-view="home"><span class="nav-icon">🏠</span>Home</button>
+    <button class="nav-btn" data-view="log"><span class="nav-icon">➕</span>Log</button>
+    <button class="nav-btn" data-view="trends"><span class="nav-icon">📈</span>Trends</button>
+    <button class="nav-btn" data-view="history"><span class="nav-icon">📜</span>History</button>
+  </div>
+</nav>
+
+<div class="sheet-backdrop" id="sheet-backdrop"></div>
+<div class="sheet" id="sheet">
+  <div class="sheet-handle"></div>
+  <button class="sheet-item" id="action-intro">🎬 Play League Intro</button>
+  <button class="sheet-item" id="action-export">📄 Export Season PDF</button>
+  <button class="sheet-item" id="action-end">🏁 End League &amp; Archive</button>
+  <button class="sheet-item danger" id="action-reset">🗑️ Reset Season Data</button>
+</div>
+
+<div class="intro-overlay hidden" id="intro-overlay">
+  <div class="intro-progress"><div class="intro-progress-bar" id="intro-progress-bar"></div></div>
+  <button class="intro-skip" id="intro-skip">Skip ✕</button>
+  <div class="intro-stage" id="intro-stage"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" onerror="window.__chartLoadFailed=true"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" onerror="window.__jspdfLoadFailed=true"></script>
+<script>
+(function () {
+  var GAMES_KEY = 'rack-tracker-games-v1';
+  var SEASONS_KEY = 'rack-tracker-seasons-v1';
+
+  var games = [];
+  var seasons = [];
+  var selectedWinner = null;
+  var selectedBalls = null;
+  var currentView = 'home';
+  var currentRange = 'month';
+  var chartInstance = null;
+  var introTimeouts = [];
+
+  /* ---------- storage ---------- */
+  function loadGames() {
+    try { var raw = localStorage.getItem(GAMES_KEY); games = raw ? JSON.parse(raw) : []; if (!Array.isArray(games)) games = []; }
+    catch (e) { games = []; }
+  }
+  function saveGames() {
+    try { localStorage.setItem(GAMES_KEY, JSON.stringify(games)); }
+    catch (e) { showToast("Couldn't save — storage unavailable"); }
+  }
+  function loadSeasons() {
+    try { var raw = localStorage.getItem(SEASONS_KEY); seasons = raw ? JSON.parse(raw) : []; if (!Array.isArray(seasons)) seasons = []; }
+    catch (e) { seasons = []; }
+  }
+  function saveSeasons() {
+    try { localStorage.setItem(SEASONS_KEY, JSON.stringify(seasons)); }
+    catch (e) { showToast("Couldn't archive season"); }
+  }
+
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(showToast._timer);
+    showToast._timer = setTimeout(function () { t.classList.remove('show'); }, 2200);
+  }
+
+  function cap(p) { return p.charAt(0).toUpperCase() + p.slice(1); }
+  function otherPlayer(p) { return p === 'linden' ? 'malachi' : 'linden'; }
+  function fmtPct(p) { return Math.round(p) + '%'; }
+  function fmtAvg(a) { return a === null ? '—' : a.toFixed(1); }
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  function dateStamp() { var d = new Date(); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function slug(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''); }
+  function fmtDate(ts) {
+    var d = new Date(ts); var today = new Date();
+    if (d.toDateString() === today.toDateString()) return 'Today';
+    var yest = new Date(today); yest.setDate(yest.getDate() - 1);
+    if (d.toDateString() === yest.toDateString()) return 'Yesterday';
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  }
+  function fmtFullDate(ts) { return new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }); }
+  function getCss(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+  /* ---------- stats ---------- */
+  function computeStats(gamesArr) {
+    gamesArr = gamesArr || games;
+    var s = { linden: { wins: 0, losses: 0, ballsSumOnWin: 0 }, malachi: { wins: 0, losses: 0, ballsSumOnWin: 0 } };
+    gamesArr.forEach(function (g) {
+      s[g.winner].wins++;
+      s[g.winner].ballsSumOnWin += g.ballsLeft;
+      s[otherPlayer(g.winner)].losses++;
+    });
+    ['linden', 'malachi'].forEach(function (p) {
+      var d = s[p]; var total = d.wins + d.losses;
+      d.total = total;
+      d.winPct = total > 0 ? (d.wins / total) * 100 : 0;
+      d.avgLeft = d.wins > 0 ? d.ballsSumOnWin / d.wins : null;
+    });
+    return s;
+  }
+  function rankOrder(s) {
+    return ['linden', 'malachi'].sort(function (a, b) {
+      if (s[b].winPct !== s[a].winPct) return s[b].winPct - s[a].winPct;
+      var aAvg = s[a].avgLeft === null ? Infinity : s[a].avgLeft;
+      var bAvg = s[b].avgLeft === null ? Infinity : s[b].avgLeft;
+      return aAvg - bAvg;
+    });
+  }
+  function computeStreak(gamesArr) {
+    gamesArr = gamesArr || games;
+    if (gamesArr.length === 0) return null;
+    var sorted = gamesArr.slice().sort(function (a, b) { return b.ts - a.ts; });
+    var leader = sorted[0].winner, count = 0;
+    for (var i = 0; i < sorted.length; i++) { if (sorted[i].winner === leader) count++; else break; }
+    return count >= 2 ? { player: leader, count: count } : null;
+  }
+  function findBestWorst(gamesArr) {
+    gamesArr = gamesArr || games;
+    if (gamesArr.length === 0) return { best: null, worst: null };
+    // best = most dominant win (loser had the MOST balls still on the table)
+    // worst = closest match (loser was nearly finished too)
+    var best = gamesArr[0], worst = gamesArr[0];
+    gamesArr.forEach(function (g) {
+      if (g.ballsLeft > best.ballsLeft) best = g;
+      if (g.ballsLeft < worst.ballsLeft) worst = g;
+    });
+    return { best: best, worst: worst };
+  }
+
+  /* ---------- nav / views ---------- */
+  function switchView(view) {
+    currentView = view;
+    document.querySelectorAll('.view').forEach(function (v) { v.classList.toggle('active', v.dataset.view === view); });
+    document.querySelectorAll('.nav-btn').forEach(function (b) { b.classList.toggle('active', b.dataset.view === view); });
+    if (view === 'trends') renderTrends();
+  }
+  document.querySelectorAll('.nav-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () { switchView(this.dataset.view); });
+  });
+  document.getElementById('home-log-btn').addEventListener('click', function () { switchView('log'); });
+  document.getElementById('hero-intro-btn').addEventListener('click', function () { playIntro(); });
+
+  /* ---------- sheet menu ---------- */
+  function openSheet() { document.getElementById('sheet').classList.add('show'); document.getElementById('sheet-backdrop').classList.add('show'); }
+  function closeSheet() { document.getElementById('sheet').classList.remove('show'); document.getElementById('sheet-backdrop').classList.remove('show'); }
+  document.getElementById('menu-btn').addEventListener('click', openSheet);
+  document.getElementById('sheet-backdrop').addEventListener('click', closeSheet);
+
+  /* ---------- ball picker (log view) ---------- */
+  function buildBallPicker() {
+    var wrap = document.getElementById('ball-picker');
+    wrap.innerHTML = '';
+    for (var i = 0; i <= 7; i++) {
+      var b = document.createElement('div');
+      b.className = 'ball-opt'; b.dataset.value = i; b.textContent = i;
+      b.addEventListener('click', function () {
+        selectedBalls = parseInt(this.dataset.value, 10);
+        Array.prototype.forEach.call(wrap.children, function (el) {
+          el.classList.toggle('selected', parseInt(el.dataset.value, 10) === selectedBalls);
+        });
+        updateLogButton();
+      });
+      wrap.appendChild(b);
+    }
+  }
+  function updateLogButton() {
+    document.getElementById('log-btn').disabled = !(selectedWinner && selectedBalls !== null);
+  }
+  document.querySelectorAll('.winner-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      selectedWinner = this.dataset.player;
+      document.querySelectorAll('.winner-btn').forEach(function (b) { b.classList.toggle('selected', b === btn); });
+      document.getElementById('balls-label').textContent = 'How many balls did ' + cap(otherPlayer(selectedWinner)) + ' have left?';
+      updateLogButton();
+    });
+  });
+  document.getElementById('log-btn').addEventListener('click', function () {
+    if (!selectedWinner || selectedBalls === null) return;
+    var noteVal = document.getElementById('note-input').value.trim();
+    games.push({
+      id: Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+      winner: selectedWinner, ballsLeft: selectedBalls, ts: Date.now(),
+      note: noteVal ? noteVal : undefined
+    });
+    saveGames();
+    showToast(cap(selectedWinner) + ' wins logged 🎱');
+
+    var winnerForPulse = selectedWinner;
+    selectedWinner = null; selectedBalls = null;
+    document.querySelectorAll('.winner-btn').forEach(function (b) { b.classList.remove('selected'); });
+    document.querySelectorAll('.ball-opt').forEach(function (b) { b.classList.remove('selected'); });
+    document.getElementById('balls-label').textContent = 'How many balls did they have left?';
+    document.getElementById('note-input').value = '';
+    updateLogButton();
+    render();
+
+    setTimeout(function () {
+      switchView('home');
+      var card = document.getElementById('profile-card-' + winnerForPulse);
+      if (card) { card.classList.add('pulse'); setTimeout(function () { card.classList.remove('pulse'); }, 700); }
+    }, 200);
+  });
+
+  /* ---------- render: home ---------- */
+  function renderHome() {
+    var s = computeStats();
+    var streak = computeStreak();
+    var order = rankOrder(s);
+    var container = document.getElementById('home-profiles');
+    container.innerHTML = '';
+    order.forEach(function (p, idx) {
+      var d = s[p];
+      var accent = p === 'linden' ? getCss('--linden') : getCss('--malachi');
+      var badge = '';
+      if (streak && streak.player === p) badge = '<span class="streak-badge">🔥 ' + streak.count + ' in a row</span>';
+      else if (idx === 0 && d.total > 0) badge = '<span class="streak-badge">👑 Leading</span>';
+      var card = document.createElement('div');
+      card.className = 'profile-card';
+      card.id = 'profile-card-' + p;
+      card.style.setProperty('--accent', accent);
+      card.innerHTML =
+        '<div class="ring" style="background:conic-gradient(' + accent + ' ' + (d.winPct * 3.6) + 'deg, var(--surface-sunken) 0)">' +
+          '<div class="ring-inner"><div class="pct">' + fmtPct(d.winPct) + '</div><div class="lbl">win rate</div></div>' +
+        '</div>' +
+        '<div class="profile-info">' +
+          '<div class="profile-name-row"><span class="profile-name">' + cap(p) + '</span>' + badge + '</div>' +
+          '<div class="profile-stats">' + d.wins + 'W – ' + d.losses + 'L &middot; avg left ' + fmtAvg(d.avgLeft) + '</div>' +
+        '</div>';
+      container.appendChild(card);
+    });
+
+    var bw = findBestWorst();
+    var bestTile = document.getElementById('tile-best').querySelector('.h-value');
+    var worstTile = document.getElementById('tile-worst').querySelector('.h-value');
+    bestTile.textContent = bw.best
+      ? cap(bw.best.winner) + ' ran it out while ' + cap(otherPlayer(bw.best.winner)) + ' still had ' + bw.best.ballsLeft + (bw.best.ballsLeft === 1 ? ' ball' : ' balls') + ' on the table.'
+      : 'Log a game to see your best win.';
+    worstTile.textContent = bw.worst
+      ? (bw.worst.ballsLeft === 0
+          ? cap(bw.worst.winner) + ' took it on the 8-ball \u2014 ' + cap(otherPlayer(bw.worst.winner)) + ' was clear too.'
+          : cap(bw.worst.winner) + ' edged out ' + cap(otherPlayer(bw.worst.winner)) + ' by just ' + bw.worst.ballsLeft + (bw.worst.ballsLeft === 1 ? ' ball' : ' balls') + '.')
+      : 'Log a game to see your closest match.';
+
+    document.getElementById('home-total-games').textContent = games.length;
+  }
+
+  /* ---------- render: history ---------- */
+  function renderHistory() {
+    var hist = document.getElementById('history-list');
+    hist.innerHTML = '';
+    if (games.length === 0) {
+      hist.innerHTML = '<div class="empty-state"><span class="big">🎱</span>No games yet — log your first one to get started.</div>';
+      return;
+    }
+    var sorted = games.slice().sort(function (a, b) { return b.ts - a.ts; });
+    sorted.forEach(function (g) {
+      var row = document.createElement('div');
+      row.className = 'history-row';
+      var ballClass = g.winner === 'linden' ? 'ball-linden-mini' : 'ball-malachi-mini';
+      var ballColor = g.winner === 'linden' ? getCss('--linden') : getCss('--malachi');
+      var ballNum = g.winner === 'linden' ? '2' : '13';
+      var loser = otherPlayer(g.winner);
+      row.innerHTML =
+        '<span class="mini-ball" style="background:' + ballColor + '">' + ballNum + '</span>' +
+        '<span class="text"><strong>' + cap(g.winner) + '</strong> beat ' + cap(loser) + ' &middot; ' + g.ballsLeft + (g.ballsLeft === 1 ? ' ball' : ' balls') + ' left' +
+        (g.note ? '<span class="note">"' + g.note + '"</span>' : '') + '</span>' +
+        '<span class="date">' + fmtDate(g.ts) + '</span>' +
+        '<button class="del" title="Delete game" data-id="' + g.id + '">✕</button>';
+      hist.appendChild(row);
+    });
+    Array.prototype.forEach.call(hist.querySelectorAll('.del'), function (btn) {
+      btn.addEventListener('click', function () {
+        var id = this.dataset.id;
+        games = games.filter(function (g) { return String(g.id) !== id; });
+        saveGames(); render(); showToast('Game removed');
+      });
+    });
+  }
+
+  /* ---------- render: trends ---------- */
+  function getRangeStart(range) {
+    var now = new Date();
+    if (range === 'week') { var d = new Date(now); d.setDate(d.getDate() - 7); return d.getTime(); }
+    if (range === 'month') { var d2 = new Date(now); d2.setDate(d2.getDate() - 30); return d2.getTime(); }
+    if (range === 'year') { var d3 = new Date(now); d3.setDate(d3.getDate() - 365); return d3.getTime(); }
+    return 0;
+  }
+  function renderTrends() {
+    var start = getRangeStart(currentRange);
+    var filtered = games.filter(function (g) { return g.ts >= start; }).sort(function (a, b) { return a.ts - b.ts; });
+    var emptyEl = document.getElementById('trends-empty');
+    var canvas = document.getElementById('trends-chart');
+
+    if (window.__chartLoadFailed || typeof window.Chart === 'undefined') {
+      emptyEl.style.display = 'block';
+      emptyEl.innerHTML = '<span class="big">⚠️</span>Charts could not load. Check your connection and reopen this page.';
+      canvas.style.display = 'none';
+      document.getElementById('trend-summary').innerHTML = '';
+      return;
+    }
+    if (filtered.length === 0) {
+      emptyEl.style.display = 'block';
+      emptyEl.innerHTML = '<span class="big">📈</span>No games logged in this range yet.';
+      canvas.style.display = 'none';
+      document.getElementById('trend-summary').innerHTML = '';
+      if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+      return;
+    }
+    emptyEl.style.display = 'none';
+    canvas.style.display = 'block';
+
+    var labels = [], lindenPct = [], malachiPct = [];
+    var w = { linden: 0, malachi: 0 }, l = { linden: 0, malachi: 0 };
+    filtered.forEach(function (g) {
+      w[g.winner]++; l[otherPlayer(g.winner)]++;
+      labels.push(fmtDate(g.ts));
+      var lt = w.linden + l.linden, mt = w.malachi + l.malachi;
+      lindenPct.push(lt > 0 ? (w.linden / lt * 100) : 0);
+      malachiPct.push(mt > 0 ? (w.malachi / mt * 100) : 0);
+    });
+
+    var lindenColor = getCss('--linden'), malachiColor = getCss('--malachi'), inkSoft = getCss('--ink-soft'), lineColor = getCss('--line');
+    var data = {
+      labels: labels,
+      datasets: [
+        { label: 'Linden', data: lindenPct, borderColor: lindenColor, backgroundColor: lindenColor, tension: 0.3, pointRadius: 3, borderWidth: 2.5 },
+        { label: 'Malachi', data: malachiPct, borderColor: malachiColor, backgroundColor: malachiColor, tension: 0.3, pointRadius: 3, borderWidth: 2.5 }
+      ]
+    };
+    var opts = {
+      responsive: true, maintainAspectRatio: false,
+      scales: {
+        y: { min: 0, max: 100, ticks: { callback: function (v) { return v + '%'; }, color: inkSoft, font: { family: 'Inter', size: 11 } }, grid: { color: lineColor } },
+        x: { ticks: { color: inkSoft, font: { family: 'Inter', size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 6 }, grid: { display: false } }
+      },
+      plugins: { legend: { display: true, position: 'bottom', labels: { color: inkSoft, font: { family: 'Inter', size: 12 }, boxWidth: 10, usePointStyle: true } } }
+    };
+
+    if (chartInstance) { chartInstance.data = data; chartInstance.options = opts; chartInstance.update(); }
+    else if (window.Chart) { chartInstance = new Chart(canvas.getContext('2d'), { type: 'line', data: data, options: opts }); }
+
+    document.getElementById('trend-summary').innerHTML =
+      '<div class="trend-chip"><div class="name">Linden</div><div class="rec">' + w.linden + '–' + l.linden + '</div></div>' +
+      '<div class="trend-chip"><div class="name">Malachi</div><div class="rec">' + w.malachi + '–' + l.malachi + '</div></div>';
+  }
+  document.querySelectorAll('#range-chips .chip').forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      currentRange = this.dataset.range;
+      document.querySelectorAll('#range-chips .chip').forEach(function (c) { c.classList.toggle('active', c === chip); });
+      renderTrends();
+    });
+  });
+
+  function render() { renderHome(); renderHistory(); if (currentView === 'trends') renderTrends(); }
+
+  /* ---------- reset ---------- */
+  document.getElementById('action-reset').addEventListener('click', function () {
+    closeSheet();
+    if (games.length === 0) { showToast('Nothing to reset'); return; }
+    if (confirm('Clear the whole season? This deletes every logged game and cannot be undone.')) {
+      games = []; saveGames(); render(); showToast('Season reset');
+    }
+  });
+
+  /* ---------- PDF export ---------- */
+  function buildSeasonPdfDoc(gamesForPdf, label) {
+    var jsPDFCtor = window.jspdf.jsPDF;
+    var doc = new jsPDFCtor({ unit: 'pt', format: 'letter' });
+    var margin = 48, y = margin;
+    var pageHeight = doc.internal.pageSize.getHeight();
+
+    function ensureSpace(h) { if (y + h > pageHeight - margin) { doc.addPage(); y = margin; } }
+    function line(text, size, color, bold) {
+      doc.setFontSize(size);
+      doc.setFont(undefined, bold ? 'bold' : 'normal');
+      if (color) doc.setTextColor(color[0], color[1], color[2]); else doc.setTextColor(20, 30, 25);
+      ensureSpace(size + 8);
+      doc.text(text, margin, y);
+      y += size + 8;
+    }
+
+    line('RACK TRACKER', 22, [47, 107, 79], true);
+    line(label, 13, [120, 120, 120], false);
+    line('Generated ' + new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }), 10, [140, 140, 140], false);
+    y += 10;
+
+    var s = computeStats(gamesForPdf);
+    var order = rankOrder(s);
+    line('Final standings', 15, [47, 107, 79], true);
+    order.forEach(function (p, i) {
+      var d = s[p];
+      line((i + 1) + '. ' + cap(p) + ' — ' + d.wins + '-' + d.losses + ' (' + Math.round(d.winPct) + '% win rate, avg ' + fmtAvg(d.avgLeft) + ' balls left on wins)', 12, null, i === 0);
+    });
+    y += 6;
+
+    var bw = findBestWorst(gamesForPdf);
+    var streak = computeStreak(gamesForPdf);
+    line('Highlights', 15, [47, 107, 79], true);
+    if (bw.best) line('Most dominant win: ' + cap(bw.best.winner) + ' ran it out with ' + cap(otherPlayer(bw.best.winner)) + ' still on ' + bw.best.ballsLeft + ' balls (' + fmtFullDate(bw.best.ts) + ')', 12);
+    if (bw.worst) line('Closest match: ' + cap(bw.worst.winner) + ' edged ' + cap(otherPlayer(bw.worst.winner)) + ' by just ' + bw.worst.ballsLeft + ' balls (' + fmtFullDate(bw.worst.ts) + ')', 12);
+    if (streak) line('Ending streak: ' + cap(streak.player) + ' won ' + streak.count + ' in a row to close it out', 12);
+    y += 6;
+
+    var sorted = gamesForPdf.slice().sort(function (a, b) { return a.ts - b.ts; });
+    line('Full match log (' + gamesForPdf.length + ' games)', 15, [47, 107, 79], true);
+    sorted.forEach(function (g, i) {
+      var txt = (i + 1) + '. ' + fmtFullDate(g.ts) + ' — ' + cap(g.winner) + ' beat ' + cap(otherPlayer(g.winner)) + ', ' + g.ballsLeft + ' left' + (g.note ? ' — "' + g.note + '"' : '');
+      line(txt, 10.5);
+    });
+
+    return doc;
+  }
+
+  function exportSeasonPdf(gamesForPdf, label, archiveAfter) {
+    if (gamesForPdf.length === 0) { showToast('No games to export yet'); return; }
+    if (window.__jspdfLoadFailed || typeof window.jspdf === 'undefined') { showToast('PDF library could not load — check your connection'); return; }
+    var doc;
+    try { doc = buildSeasonPdfDoc(gamesForPdf, label); }
+    catch (e) { showToast('Could not build the PDF'); return; }
+    var blob = doc.output('blob');
+    var filename = 'rack-tracker-' + slug(label) + '-' + dateStamp() + '.pdf';
+
+    function afterAttempt() {
+      if (archiveAfter) {
+        seasons.push({ id: Date.now(), endedAt: Date.now(), games: gamesForPdf });
+        saveSeasons();
+        games = [];
+        saveGames();
+        render();
+        showToast('Season archived — fresh start! 🎉');
+      }
+    }
+
+    // Standard browser download - works on GitHub Pages, local files, and mobile browsers.
+    try {
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+      showToast('PDF saved \ud83d\udcc4');
+    } catch (e) {
+      // Fallback for browsers that block programmatic downloads (some iOS versions):
+      // open the PDF in a new tab so it can be saved or shared manually.
+      try {
+        doc.output('dataurlnewwindow');
+        showToast('PDF opened \u2014 use Share to save it');
+      } catch (e2) {
+        showToast('Could not create the PDF');
+        return;
+      }
+    }
+    afterAttempt();
+  }
+
+  document.getElementById('action-export').addEventListener('click', function () {
+    closeSheet();
+    exportSeasonPdf(games, 'Season Recap', false);
+  });
+  document.getElementById('action-end').addEventListener('click', function () {
+    closeSheet();
+    if (games.length === 0) { showToast('No games to end yet'); return; }
+    if (!confirm('End this league? This generates a final season PDF and archives all ' + games.length + ' games, then starts a fresh season.')) return;
+    exportSeasonPdf(games, 'Final Season Recap', true);
+  });
+
+  /* ---------- league intro ---------- */
+  function raceRowHtml(p, pct) {
+    var color = p === 'linden' ? 'var(--linden)' : 'var(--malachi)';
+    return '<div class="race-row"><div class="race-label"><span>' + cap(p) + '</span><span>' + Math.round(pct) + '%</span></div>' +
+      '<div class="race-track"><div class="race-fill" id="race-fill-' + p + '" style="background:' + color + '"></div></div></div>';
+  }
+  function animateNumber(el, from, to, duration) {
+    var start = performance.now();
+    function frame(now) {
+      var t = Math.min(1, (now - start) / duration);
+      el.textContent = Math.round(from + (to - from) * t);
+      if (t < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+  function launchConfetti(container) {
+    var colors = [getCss('--linden'), getCss('--malachi'), getCss('--rail'), '#ffffff'];
+    for (var i = 0; i < 26; i++) {
+      var el = document.createElement('div');
+      el.className = 'confetti-ball';
+      el.style.left = (Math.random() * 100) + '%';
+      el.style.background = colors[i % colors.length];
+      el.style.animationDuration = (2.2 + Math.random() * 1.6) + 's';
+      el.style.animationDelay = (Math.random() * 0.6) + 's';
+      container.appendChild(el);
+    }
+  }
+  function clearIntroTimeouts() { introTimeouts.forEach(clearTimeout); introTimeouts = []; }
+
+  function playIntro() {
+    var overlay = document.getElementById('intro-overlay');
+    var stageEl = document.getElementById('intro-stage');
+    var progressBar = document.getElementById('intro-progress-bar');
+    overlay.classList.remove('hidden');
+    progressBar.style.width = '0%';
+
+    var s = computeStats();
+    var order = rankOrder(s);
+    var leaderP = order[0];
+    var streak = computeStreak();
+    var bw = findBestWorst();
+    var total = games.length;
+
+    var stages = [
+      { dur: 4000, render: function () {
+        stageEl.innerHTML = '<div class="intro-title">SEASON RECAP</div><div class="intro-big">🎱 Rack Tracker</div><div class="intro-sub">Time to see how the season stacked up.</div>';
+      }},
+      { dur: 5000, render: function () {
+        stageEl.innerHTML = '<div class="intro-title">GAMES PLAYED</div><div class="intro-big" id="games-counter">0</div><div class="intro-sub">racked, broken, and finished</div>';
+        animateNumber(document.getElementById('games-counter'), 0, total, 1600);
+      }},
+      { dur: 7000, render: function () {
+        stageEl.innerHTML = '<div class="intro-title">WIN RATE RACE</div><div class="intro-race">' + raceRowHtml('linden', s.linden.winPct) + raceRowHtml('malachi', s.malachi.winPct) + '</div>';
+        requestAnimationFrame(function () {
+          var lb = document.getElementById('race-fill-linden'), mb = document.getElementById('race-fill-malachi');
+          if (lb) lb.style.width = s.linden.winPct + '%';
+          if (mb) mb.style.width = s.malachi.winPct + '%';
+        });
+      }},
+      { dur: 4000, render: function () {
+        if (streak) stageEl.innerHTML = '<div class="intro-title">ON FIRE</div><div class="intro-big">🔥</div><div class="intro-sub">' + cap(streak.player) + ' is on a ' + streak.count + '-game win streak</div>';
+        else stageEl.innerHTML = '<div class="intro-title">TIGHT SEASON</div><div class="intro-big">⚖️</div><div class="intro-sub">No one has pulled ahead with a streak — it is anyone to win.</div>';
+      }},
+      { dur: 4000, render: function () {
+        if (bw.best) stageEl.innerHTML = '<div class="intro-title">MOST DOMINANT WIN</div><div class="intro-big">🎯</div><div class="intro-sub">' + cap(bw.best.winner) + ' ran it out while ' + cap(otherPlayer(bw.best.winner)) + ' still had ' + bw.best.ballsLeft + (bw.best.ballsLeft === 1 ? ' ball' : ' balls') + ' left</div>';
+        else stageEl.innerHTML = '<div class="intro-title">MOST DOMINANT WIN</div><div class="intro-big">🎯</div><div class="intro-sub">Log a game to find out.</div>';
+      }},
+      { dur: 6000, render: function () {
+        if (total === 0) { stageEl.innerHTML = '<div class="intro-title">LEAGUE LEADER</div><div class="intro-big">🎱</div><div class="intro-sub">No games yet — log one to crown a leader.</div>'; return; }
+        stageEl.innerHTML = '<div class="intro-crown">👑</div><div class="intro-title">LEAGUE LEADER</div><div class="intro-big">' + cap(leaderP) + '</div>' +
+          '<div class="intro-sub">' + Math.round(s[leaderP].winPct) + '% win rate &middot; ' + s[leaderP].wins + '–' + s[leaderP].losses + '</div>' +
+          '<div class="intro-sub" style="margin-top:14px;opacity:.7;">Tap anywhere to view standings</div>';
+        launchConfetti(overlay);
+      }}
+    ];
+
+    var totalDur = stages.reduce(function (a, b) { return a + b.dur; }, 0);
+    var elapsed = 0;
+
+    function step(i) {
+      if (i >= stages.length) { finishIntro(); return; }
+      stages[i].render();
+      var stageStart = Date.now(), stageDur = stages[i].dur;
+      function tick() {
+        var t = Date.now() - stageStart;
+        var frac = Math.min(1, (elapsed + t) / totalDur);
+        progressBar.style.width = (frac * 100) + '%';
+        if (t < stageDur) introTimeouts.push(setTimeout(tick, 100));
+      }
+      tick();
+      introTimeouts.push(setTimeout(function () { elapsed += stageDur; step(i + 1); }, stageDur));
+    }
+    function finishIntro() {
+      overlay.addEventListener('click', closeIntroOnce);
+      introTimeouts.push(setTimeout(closeIntroOnce, 4000));
+    }
+    function closeIntroOnce() { overlay.removeEventListener('click', closeIntroOnce); closeIntro(); }
+
+    step(0);
+  }
+  function closeIntro() {
+    clearIntroTimeouts();
+    var overlay = document.getElementById('intro-overlay');
+    overlay.classList.add('hidden');
+    Array.prototype.forEach.call(overlay.querySelectorAll('.confetti-ball'), function (el) { el.remove(); });
+    document.getElementById('intro-progress-bar').style.width = '0%';
+    switchView('home');
+    render();
+  }
+  document.getElementById('intro-skip').addEventListener('click', function (e) { e.stopPropagation(); closeIntro(); });
+  document.getElementById('action-intro').addEventListener('click', function () { closeSheet(); playIntro(); });
+
+  /* ---------- init ---------- */
+  buildBallPicker();
+  loadGames();
+  loadSeasons();
+  render();
+})();
+</script>
+</body>
+</html>
