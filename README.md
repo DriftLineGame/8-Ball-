@@ -86,6 +86,14 @@ the first time that phone connects to an empty league.
 
 ## Changelog
 
+### 3.1.0
+- Official standings table: position, games played, W, L, win percentage (.636), average balls left and last-five form
+- Seasons are numbered (header, reports, past seasons, recap)
+- History entries are numbered as games
+- Emojis replaced with line icons and a brass crown mark
+- Formal wording: season records, largest margin, closest finish, season report
+- Recap finale uses light rays instead of confetti
+
 ### 3.0.1
 - Connected to the league's Firebase project (`rack-tracker-fa690`)
 

@@ -78,7 +78,9 @@ button{cursor:pointer}
 .side.r .who{flex-direction:row-reverse}
 .side .pct{font-family:var(--display);font-weight:900;font-size:62px;line-height:.85;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
 .side .sub{font-size:12.5px;color:rgba(255,255,255,.72)}
-.crownmark{font-size:15px;margin-left:2px}
+.crownmark{display:inline-flex;color:var(--brass);margin-left:2px}
+.crownmark svg{width:17px;height:12px}
+.crownmark[hidden]{display:none}
 .record{font-family:var(--display);font-weight:800;font-size:30px;line-height:1;color:var(--brass);padding-bottom:6px;font-variant-numeric:tabular-nums}
 .balance{position:relative;z-index:2;height:10px;border-radius:999px;background:rgba(0,0,0,.28);overflow:hidden;display:flex}
 .balance span{height:100%;transition:width 1s var(--ease)}
@@ -114,10 +116,30 @@ button{cursor:pointer}
 .sect{font-family:var(--display);font-weight:800;font-size:22px;margin:26px 0 8px}
 .hl{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
 .hl li{display:flex;gap:14px;align-items:flex-start;padding:14px 2px;border-bottom:1px solid var(--line)}
-.hl .ic{font-size:20px;line-height:1.2;width:24px;text-align:center;flex-shrink:0}
+.hl .ic{width:34px;height:34px;border-radius:10px;background:var(--paper);border:1px solid var(--line);color:var(--cloth);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hl .ic svg{width:18px;height:18px}
 .hl .t{font-weight:700;font-size:14.5px}
 .hl .d{font-size:14px;color:var(--ink-2);margin-top:2px}
 .rule{font-size:12.5px;color:var(--ink-3);margin-top:14px;line-height:1.5}
+.stand-wrap{background:var(--paper);border:1px solid var(--line);border-radius:16px;overflow-x:auto}
+.stand{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:13.5px}
+.stand th{font-size:11.5px;font-weight:600;color:var(--ink-3);text-align:right;padding:11px 5px 9px;border-bottom:1px solid var(--line);white-space:nowrap}
+.stand td{padding:12px 5px;text-align:right;white-space:nowrap}
+.stand tr+tr td{border-top:1px solid var(--line)}
+.stand th:first-child,.stand td:first-child{text-align:center;padding-left:10px;width:18px}
+.stand th:nth-child(2),.stand td:nth-child(2){text-align:left}
+.stand th:last-child,.stand td:last-child{padding-right:10px}
+.stand .pos{font-family:var(--display);font-weight:800;font-size:18px;color:var(--ink-3)}
+.stand .ply{display:flex;align-items:center;gap:6px;font-weight:700}
+.stand .pct{font-weight:700}
+.form{display:inline-flex;gap:2px;vertical-align:middle}
+.form i{width:8px;height:8px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--c);background:transparent}
+.form i.w{background:var(--c)}
+.form i.none{box-shadow:inset 0 0 0 1.5px var(--line)}
+.hrow .gno{font-size:12px;font-weight:600;color:var(--ink-3)}
+.hrow .dt{text-align:right}
+.icrown{display:inline-block;color:var(--brass);animation:drop .9s var(--spring) both}
+.icrown svg{width:78px;height:52px;filter:drop-shadow(0 6px 18px rgba(0,0,0,.4))}
 
 /* ---------- bottom nav ---------- */
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:60;padding-bottom:env(safe-area-inset-bottom,0px);
@@ -205,7 +227,9 @@ button{cursor:pointer}
 .menu{list-style:none;margin:8px 0 0;padding:0}
 .menu button{width:100%;display:flex;align-items:center;gap:14px;padding:15px 4px;background:none;border:none;border-bottom:1px solid var(--line);text-align:left}
 .menu li:last-child button{border-bottom:none}
-.menu .mi{width:36px;height:36px;border-radius:10px;background:var(--paper-2);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.menu .mi{width:36px;height:36px;border-radius:10px;background:var(--paper-2);color:var(--ink-2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.menu .mi svg{width:19px;height:19px}
+.menu .danger .mi{color:var(--danger)}
 .menu .mt{font-weight:700;font-size:15px}
 .menu .md{font-size:13px;color:var(--ink-3);margin-top:1px}
 .menu .danger .mt{color:var(--danger)}
@@ -297,13 +321,10 @@ button{cursor:pointer}
 .itrack{height:20px;border-radius:999px;background:rgba(0,0,0,.35);overflow:hidden}
 .ifill{height:100%;width:0;border-radius:999px;transition:width 2.2s cubic-bezier(.16,.9,.2,1)}
 .irow .meta{font-size:13px;color:rgba(255,255,255,.7);margin-top:6px}
-.crown{font-size:64px;display:inline-block;animation:drop .9s var(--spring) both}
 @keyframes drop{from{opacity:0;transform:translateY(-120px) rotate(-30deg)}to{opacity:1;transform:none}}
 .ray{position:absolute;left:50%;top:50%;width:3px;height:70vmax;transform-origin:50% 0;z-index:3;pointer-events:none;
   background:linear-gradient(180deg,rgba(228,179,67,.55),transparent 70%);animation:rays 1s var(--ease) both}
 @keyframes rays{from{opacity:0;height:0}to{opacity:1;height:70vmax}}
-.conf{position:absolute;top:-20px;width:10px;height:14px;border-radius:2px;z-index:5;pointer-events:none;animation:fall linear forwards}
-@keyframes fall{to{transform:translateY(115vh) rotate(760deg)}}
 
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
@@ -313,7 +334,7 @@ button{cursor:pointer}
 <body>
 <div class="app">
   <header class="top">
-    <h1 class="wordmark">Rack Tracker<small>Linden vs Malachi</small></h1>
+    <h1 class="wordmark">Rack Tracker<small id="season-label">8-ball championship, season 1</small></h1>
     <button class="sync" id="sync" data-s="local" type="button" aria-live="polite"><i></i><span id="sync-t">This phone only</span></button>
   </header>
 
@@ -327,34 +348,40 @@ button{cursor:pointer}
         <div class="headline" id="headline">No games yet</div>
         <div class="duel">
           <div class="side" id="side-linden">
-            <div class="who"><span class="ball l" style="--s:22px"><span class="n">2</span></span>Linden<span class="crownmark" id="crown-linden" hidden>👑</span></div>
+            <div class="who"><span class="ball l" style="--s:22px"><span class="n">2</span></span>Linden<span class="crownmark" id="crown-linden" hidden title="League leader"><svg viewBox="0 0 24 16" aria-hidden="true"><path d="M2 14h20l1.2-10-6.2 4.5L12 1 7 8.5.8 4z" fill="currentColor"/></svg></span></div>
             <div class="pct" id="pct-linden">0%</div>
             <div class="sub" id="sub-linden">No wins yet</div>
           </div>
           <div class="record" id="record">0–0</div>
           <div class="side r" id="side-malachi">
-            <div class="who"><span class="ball m" style="--s:22px"><span class="n">6</span></span>Malachi<span class="crownmark" id="crown-malachi" hidden>👑</span></div>
+            <div class="who"><span class="ball m" style="--s:22px"><span class="n">6</span></span>Malachi<span class="crownmark" id="crown-malachi" hidden title="League leader"><svg viewBox="0 0 24 16" aria-hidden="true"><path d="M2 14h20l1.2-10-6.2 4.5L12 1 7 8.5.8 4z" fill="currentColor"/></svg></span></div>
             <div class="pct" id="pct-malachi">0%</div>
             <div class="sub" id="sub-malachi">No wins yet</div>
           </div>
         </div>
         <div class="balance" aria-hidden="true"><span class="bl" id="bal-l" style="width:50%"></span><span class="bm" id="bal-m" style="width:50%"></span></div>
         <div class="tray" id="tray"></div>
-        <div class="traycap" id="traycap">Your last 10 games land here, newest on the right</div>
+        <div class="traycap" id="traycap">Last 10 results, most recent on the right</div>
       </div>
     </div>
 
-    <button class="intro-link" id="intro-btn" type="button"><span class="play">▶</span>Watch the league intro</button>
+    <button class="intro-link" id="intro-btn" type="button"><span class="play"><svg viewBox="0 0 10 12" width="9" height="11" aria-hidden="true"><path d="M0 0l10 6-10 6z" fill="currentColor"/></svg></span>Play the season recap</button>
+
+    <h2 class="sect">Standings</h2>
+    <div class="stand-wrap"><table class="stand">
+      <thead><tr><th scope="col" aria-label="Position">#</th><th scope="col">Player</th><th scope="col" title="Games played">GP</th><th scope="col">W</th><th scope="col">L</th><th scope="col" title="Win percentage">Pct</th><th scope="col" title="Average balls left on wins">Avg</th><th scope="col">Last 5</th></tr></thead>
+      <tbody id="stand"></tbody>
+    </table></div>
 
     <div class="stats">
       <div><div class="v" id="st-games">0</div><div class="k">Games played</div></div>
-      <div><div class="v" id="st-streak">–</div><div class="k" id="st-streak-k">Win streak</div></div>
+      <div><div class="v" id="st-streak">–</div><div class="k" id="st-streak-k">Current streak</div></div>
       <div><div class="v" id="st-last">–</div><div class="k">Last game</div></div>
     </div>
 
-    <h2 class="sect">Season highlights</h2>
+    <h2 class="sect">Season records</h2>
     <ul class="hl" id="hl"></ul>
-    <p class="rule">Ranked by win rate. If you're tied, the player who leaves the loser with fewer balls on average wins the tiebreak.</p>
+    <p class="rule">Standings are ranked by win percentage. Ties are broken by the lower average balls left on wins. Avg is the average number of balls the opponent had left in that player’s wins.</p>
   </section>
 
   <!-- TRENDS -->
@@ -429,7 +456,7 @@ button{cursor:pointer}
   <div class="field"><input type="text" id="note" maxlength="60" placeholder="What happened?" autocomplete="off" enterkeyhint="done"><span class="count" id="note-count">0/60</span></div>
   <div class="chips sugg" id="sugg">
     <button class="chip" type="button">Break and run</button>
-    <button class="chip" type="button">Nail-biter</button>
+    <button class="chip" type="button">Close game</button>
     <button class="chip" type="button">Scratched on the 8</button>
     <button class="chip" type="button">Comeback</button>
     <button class="chip" type="button">Bank shot to win</button>
@@ -445,12 +472,12 @@ button{cursor:pointer}
   <div class="grab"></div>
   <div class="sh-head"><h2 id="more-title">More</h2><button class="x" data-close type="button" aria-label="Close">×</button></div>
   <ul class="menu">
-    <li><button id="m-intro" type="button"><span class="mi">🎬</span><span><div class="mt">Watch the league intro</div><div class="md">A 15-second recap of the season</div></span></button></li>
-    <li><button id="m-pdf" type="button"><span class="mi">📄</span><span><div class="mt">Download season PDF</div><div class="md">Standings, highlights and every game</div></span></button></li>
-    <li><button id="m-seasons" type="button"><span class="mi">🏆</span><span><div class="mt">Past seasons</div><div class="md" id="m-seasons-d">No finished seasons yet</div></span></button></li>
-    <li><button id="m-end" type="button"><span class="mi">🏁</span><span><div class="mt">End the season</div><div class="md">Saves a final PDF, archives it and starts fresh</div></span></button></li>
-    <li><button id="m-sync" type="button"><span class="mi">☁️</span><span><div class="mt">Sync status</div><div class="md" id="m-sync-d">This phone only</div></span></button></li>
-    <li class="danger"><button id="m-reset" type="button"><span class="mi">🗑️</span><span><div class="mt">Delete every game</div><div class="md">Clears this season without archiving it</div></span></button></li>
+    <li><button id="m-intro" type="button"><span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9.5v5l4.5-2.5z" fill="currentColor"/></svg></span><span><div class="mt">Play the season recap</div><div class="md">A 15-second recap of the standings</div></span></button></li>
+    <li><button id="m-pdf" type="button"><span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 12v6M9 15l3 3 3-3"/></svg></span><span><div class="mt">Download season report</div><div class="md">Standings, highlights and every game</div></span></button></li>
+    <li><button id="m-seasons" type="button"><span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5v1a3 3 0 0 0 3 3M16 6h3v1a3 3 0 0 1-3 3M12 13v4M8 20h8M10 17h4"/></svg></span><span><div class="mt">Past seasons</div><div class="md" id="m-seasons-d">No finished seasons yet</div></span></button></li>
+    <li><button id="m-end" type="button"><span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg></span><span><div class="mt">End the season</div><div class="md">Saves a final report, archives the season and starts the next one</div></span></button></li>
+    <li><button id="m-sync" type="button"><span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 9.5a4.25 4.25 0 0 1-.5 8.5z"/><path d="M9.5 13.5l2 2 3.5-3.5"/></svg></span><span><div class="mt">Sync status</div><div class="md" id="m-sync-d">This phone only</div></span></button></li>
+    <li class="danger"><button id="m-reset" type="button"><span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></span><span><div class="mt">Delete every game</div><div class="md">Clears this season without archiving it</div></span></button></li>
   </ul>
   <p class="ver" id="ver"></p>
 </section>
@@ -503,10 +530,25 @@ window.RACK_LEAGUE_ID = 'main';
 <script>
 (function(){
 "use strict";
-var VERSION='3.0.1';
+var VERSION='3.1.0';
 var LK='rack-tracker-games-v1', LS='rack-tracker-seasons-v1', LM='rack-tracker-migrated-v1';
 var P=['linden','malachi'];
 var NUM={linden:'2',malachi:'6'};
+var SVG=function(p){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+p+'</svg>';};
+var ICON={
+  margin:SVG('<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/>'),
+  close:SVG('<path d="M4 12h5M15 12h5M7 9l3 3-3 3M17 9l-3 3 3 3"/>'),
+  streak:SVG('<path d="M3 17l5-5 4 3 8-8"/><path d="M15 7h5v5"/>'),
+  note:SVG('<path d="M5 19h4L19 9l-4-4L5 15z"/><path d="M13 7l4 4"/>'),
+  rack:SVG('<path d="M12 4l8 14H4z"/>')
+};
+var CROWN='<svg viewBox="0 0 24 16" aria-hidden="true"><path d="M2 14h20l1.2-10-6.2 4.5L12 1 7 8.5.8 4z" fill="currentColor"/></svg>';
+function seasonNo(){return (Store.seasons?Store.seasons.length:0)+1;}
+function pct3(w,t){if(!t)return'\u2013';var v=(w/t).toFixed(3);return v.charAt(0)==='0'?v.slice(1):v;}
+function lastFive(arr,p){
+  return arr.slice().sort(sortDesc).slice(0,5).reverse().map(function(g){return g.winner===p?'W':'L';});
+}
+function gameNumbers(arr){var m={};arr.slice().sort(function(a,b){return -sortDesc(a,b);}).forEach(function(g,i){m[g.id]=i+1;});return m;}
 
 /* ---------------- utils ---------------- */
 function $(id){return document.getElementById(id);}
@@ -779,24 +821,36 @@ function renderHome(){
   if(recent.length)firstPaint=false;
   justAdded=null;
 
+  $('season-label').textContent='8-ball championship, season '+seasonNo();
+  var ord=ranking(s), tied=n&&!lead;
+  $('stand').innerHTML=ord.map(function(p,i){
+    var d=s[p], f=lastFive(g,p), dots='';
+    for(var k=0;k<5;k++)dots+=f[k]?'<i class="'+(f[k]==='W'?'w':'')+'"></i>':'<i class="none"></i>';
+    return '<tr><td class="pos">'+(!n?'\u2013':(tied?1:i+1))+'</td>'+
+      '<td><span class="ply">'+ballHTML(p,17)+cap(p)+'</span></td>'+
+      '<td>'+d.t+'</td><td>'+d.w+'</td><td>'+d.l+'</td><td class="pct">'+pct3(d.w,d.t)+'</td>'+
+      '<td>'+(d.avg===null?'\u2013':d.avg.toFixed(1))+'</td>'+
+      '<td><span class="form" style="--c:var(--'+p+')" aria-label="Last five: '+(f.length?f.join(' '):'none')+'">'+dots+'</span></td></tr>';
+  }).join('');
+
   var cs=currentStreak(g), last=g.slice().sort(sortDesc)[0];
   $('st-games').textContent=n;
-  $('st-streak').textContent=cs?cs.n:'–';
-  $('st-streak-k').textContent=cs?cap(cs.p)+'\u2019s streak':'Win streak';
+  $('st-streak').textContent=cs?'W'+cs.n:'\u2013';
+  $('st-streak-k').textContent=cs?cap(cs.p)+'\u2019s streak':'Current streak';
   $('st-last').textContent=last?shortAgo(last.playedAt):'–';
 
   var ex=extremes(g), ls=longestStreak(g), items=[];
   if(ex.best){var bl=other(ex.best.winner);
-    items.push(['🎯','Most dominant win',ex.best.ballsLeft===0
+    items.push([ICON.margin,'Largest margin',ex.best.ballsLeft===0
       ?cap(ex.best.winner)+' won with '+cap(bl)+' down to the 8, '+shortDate(ex.best.playedAt)+'.'
       :cap(ex.best.winner)+' won with '+cap(bl)+' still on '+plural(ex.best.ballsLeft,'ball')+', '+shortDate(ex.best.playedAt)+'.']);}
-  if(ex.close&&n>1)items.push(['🤏','Closest game',ex.close.ballsLeft===0?cap(ex.close.winner)+' won with '+cap(other(ex.close.winner))+' on the 8-ball, '+shortDate(ex.close.playedAt)+'.':cap(ex.close.winner)+' won with '+cap(other(ex.close.winner))+' only '+plural(ex.close.ballsLeft,'ball')+' away, '+shortDate(ex.close.playedAt)+'.']);
-  if(ls&&ls.n>=2)items.push(['🔥','Longest win streak',cap(ls.p)+' won '+ls.n+' in a row.']);
+  if(ex.close&&n>1)items.push([ICON.close,'Closest finish',ex.close.ballsLeft===0?cap(ex.close.winner)+' won with '+cap(other(ex.close.winner))+' on the 8-ball, '+shortDate(ex.close.playedAt)+'.':cap(ex.close.winner)+' won with '+cap(other(ex.close.winner))+' only '+plural(ex.close.ballsLeft,'ball')+' away, '+shortDate(ex.close.playedAt)+'.']);
+  if(ls&&ls.n>=2)items.push([ICON.streak,'Longest winning streak',cap(ls.p)+', '+ls.n+' consecutive wins.']);
   var noted=g.filter(function(x){return x.note;}).sort(sortDesc)[0];
-  if(noted)items.push(['📝','Latest note','\u201C'+esc(noted.note)+'\u201D from '+cap(noted.winner)+'\u2019s win, '+shortDate(noted.playedAt)+'.']);
+  if(noted)items.push([ICON.note,'Latest note','\u201C'+esc(noted.note)+'\u201D from '+cap(noted.winner)+'\u2019s win, '+shortDate(noted.playedAt)+'.']);
   $('hl').innerHTML=items.length?items.map(function(it){
     return '<li><span class="ic">'+it[0]+'</span><div><div class="t">'+it[1]+'</div><div class="d">'+it[2]+'</div></div></li>';
-  }).join(''):'<li><span class="ic">🎱</span><div><div class="t">Nothing yet</div><div class="d">Highlights show up once you\u2019ve logged a game.</div></div></li>';
+  }).join(''):'<li><span class="ic">'+ICON.rack+'</span><div><div class="t">No records yet</div><div class="d">Season records appear once the first game is logged.</div></div></li>';
 }
 
 /* ---------------- render: history ---------------- */
@@ -813,7 +867,7 @@ function renderHistory(flashId){
     box.innerHTML='<div class="empty">'+ballHTML('eight',54)+'<p>No games logged yet.</p><button class="btn" type="button" data-open-log>Log your first game</button></div>';
     return;
   }
-  var html='', cur='';
+  var html='', cur='', num=gameNumbers(g);
   g.forEach(function(x){
     var lab=groupLabel(x.playedAt);
     if(lab!==cur){html+='<h3 class="grp">'+lab+'</h3>';cur=lab;}
@@ -821,7 +875,7 @@ function renderHistory(flashId){
       '<span class="tx"><div class="t1">'+cap(x.winner)+' beat '+cap(other(x.winner))+'</div>'+
       '<div class="t2">'+leftText(x.ballsLeft,other(x.winner))+'</div>'+
       (x.note?'<div class="nt">\u201C'+esc(x.note)+'\u201D</div>':'')+'</span>'+
-      '<span class="dt">'+relDay(x.playedAt)+'</span></button>';
+      '<span class="dt">'+relDay(x.playedAt)+'<br><span class="gno">Game '+num[x.id]+'</span></span></button>';
   });
   box.innerHTML=html;
 }
@@ -880,15 +934,15 @@ function renderSeasons(){
   var list=Store.seasons;
   $('m-seasons-d').textContent=list.length?plural(list.length,'finished season'):'No finished seasons yet';
   $('seasons-list').innerHTML=list.length?list.map(function(s,i){
-    var st=stats(s.games), ch=leader(st);
+    var st=stats(s.games), ch=leader(st), no=list.length-i;
     return '<div class="srow">'+(ch?ballHTML(ch,34):ballHTML('eight',34))+'<div class="tx"><div class="t1">'+
-      (ch?cap(ch)+' won the season':'Season ended level')+'</div><div class="t2">'+st.linden.w+'–'+st.malachi.w+', ended '+longDate(s.endedAt)+
-      '</div></div><button type="button" data-season="'+i+'">PDF</button></div>';
+      'Season '+no+': '+(ch?cap(ch)+', champion':'finished level')+'</div><div class="t2">'+st.linden.w+'\u2013'+st.malachi.w+', ended '+longDate(s.endedAt)+
+      '</div></div><button type="button" data-season="'+i+'">Report</button></div>';
   }).join(''):'<div class="empty"><p>When you end a season, it\u2019s archived here with its final standings.</p></div>';
 }
 $('seasons-list').addEventListener('click',function(e){
   var b=e.target.closest('[data-season]'); if(!b)return;
-  var s=Store.seasons[+b.dataset.season]; if(s)exportPdf(s.games,'Season ending '+longDate(s.endedAt));
+  var i=+b.dataset.season, s=Store.seasons[i]; if(s)exportPdf(s.games,'Season '+(Store.seasons.length-i)+' final standings');
 });
 
 var view='home';
@@ -1051,7 +1105,7 @@ function buildPdf(arr,title){
   doc.setFillColor(CL[0],CL[1],CL[2]); doc.rect(0,0,W,96,'F');
   doc.setFillColor(90,57,32); doc.rect(0,96,W,6,'F');
   font(28,'bold',[255,255,255]); txt('Rack Tracker',M,50);
-  font(12,'normal',[255,230,235]); txt(title+'   |   Linden vs Malachi',M,72);
+  font(12,'normal',[255,230,235]); txt('8-ball championship   |   '+title,M,72);
   font(10,'normal',[255,230,235]); txt('Generated '+longDate(Date.now()),W-M,50,{align:'right'});
   y=136;
 
@@ -1113,17 +1167,17 @@ function deliver(blob,name){
 }
 $('pdf-close').addEventListener('click',function(){$('pdf-modal').classList.remove('on');$('pdf-frame').src='about:blank';});
 function exportPdf(arr,title){
-  if(!arr.length){toast('There are no games to put in a PDF yet');return false;}
+  if(!arr.length){toast('There are no games to report yet');return false;}
   if(window.__pdfFail||!window.jspdf){toast('The PDF tool didn\u2019t load. Check your connection or ad blocker.');return false;}
   var doc;
   try{doc=buildPdf(arr,title);}catch(e){toast('Couldn\u2019t build the PDF: '+(e.message||'unknown error'));return false;}
   var name='rack-tracker-'+title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')+'-'+ymd(new Date())+'.pdf';
   if(!deliver(doc.output('blob'),name)){toast('Your browser blocked the download');return false;}
-  toast('PDF downloaded'); return true;
+  toast('Report downloaded'); return true;
 }
 
 /* ---------------- menu actions ---------------- */
-$('m-pdf').addEventListener('click',function(){closeSheet();exportPdf(Store.games,'Season so far');});
+$('m-pdf').addEventListener('click',function(){closeSheet();exportPdf(Store.games,'Season '+seasonNo()+' standings');});
 $('m-seasons').addEventListener('click',function(){renderSeasons();openSheet('seasons-sheet');});
 $('m-sync').addEventListener('click',function(){closeSheet();showSyncInfo();});
 $('m-intro').addEventListener('click',function(){closeSheet();playIntro();});
@@ -1132,10 +1186,11 @@ $('m-end').addEventListener('click',function(){
   closeSheet(); var g=Store.games.slice();
   if(!g.length){toast('There\u2019s no season to end yet');return;}
   if(!confirm('End the season? You\u2019ll get a final PDF, the '+plural(g.length,'game')+' move to Past seasons, and standings reset to 0\u20130'+(Store.mode==='cloud'?' on both phones':'')+'.'))return;
-  if(!exportPdf(g,'Final standings'))return; /* never archive without a PDF */
+  var nextNo=seasonNo()+1;
+  if(!exportPdf(g,'Season '+seasonNo()+' final standings'))return; /* never archive without a PDF */
   var st=stats(g), srt=g.slice().sort(sortDesc);
   Store.archive({id:uid(),endedAt:Date.now(),startedAt:srt[srt.length-1].playedAt,champion:leader(st)||'',games:g})
-    .then(function(){toast('Season archived. New season started.');})
+    .then(function(){toast('Season archived. Season '+nextNo+' has started.');})
     .catch(function(e){toast('Couldn\u2019t archive: '+(e&&e.code||'error')+'. Your games are untouched.');});
 });
 $('m-reset').addEventListener('click',function(){
@@ -1201,9 +1256,8 @@ function stageSwap(html){
 function countUp(el,to,ms){var t0=performance.now();
   (function f(n){var p=Math.min(1,(n-t0)/ms);el.textContent=Math.round(to*(1-Math.pow(1-p,3)));if(p<1&&!$('intro').hidden)requestAnimationFrame(f);})(t0);}
 function burst(){
-  var ov=$('intro'), c=[css('--linden'),css('--malachi'),'#E4B343','#ffffff'], h='';
+  var ov=$('intro'), h='';
   for(var i=0;i<12;i++)h+='<div class="ray" style="transform:translateX(-50%) rotate('+(i*30)+'deg);animation-delay:'+(i*30)+'ms"></div>';
-  for(var k=0;k<40;k++)h+='<div class="conf" style="left:'+(Math.random()*100)+'%;background:'+c[k%4]+';animation-duration:'+(1.8+Math.random()*1.2)+'s;animation-delay:'+(Math.random()*.4)+'s"></div>';
   var w=document.createElement('div'); w.id='fx'; w.innerHTML=h; ov.appendChild(w);
 }
 
@@ -1216,30 +1270,30 @@ function playIntro(){
   requestAnimationFrame(function(){startBreak($('felt'));});
 
   /* timeline, in ms from start. Total runtime is exactly 15000. */
-  T(function(){stageSwap('<div class="ik rise">Season recap</div><h2 class="ibig slam">Rack<br>Tracker</h2>');},1250);
+  T(function(){stageSwap('<div class="ik rise">Season '+seasonNo()+' recap</div><h2 class="ibig slam">Rack<br>Tracker</h2>');},1250);
   T(function(){$('felt').style.opacity='.22';},2900);
-  T(function(){stageSwap('<div class="ik rise">The rivalry</div><div class="vs">'+ballHTML('linden',96)+'<span class="x">vs</span>'+ballHTML('malachi',96)+'</div>'+
+  T(function(){stageSwap('<div class="ik rise">Head to head</div><div class="vs">'+ballHTML('linden',96)+'<span class="x">vs</span>'+ballHTML('malachi',96)+'</div>'+
     '<div class="vsn rise d3"><span>Linden<small>'+s.linden.w+'–'+s.linden.l+'</small></span><span>Malachi<small>'+s.malachi.w+'–'+s.malachi.l+'</small></span></div>');},3000);
   T(function(){stageSwap('<div class="ik rise">Games played</div><h2 class="ibig" id="icount">0</h2>'+
-    '<p class="isub rise d2">'+(first?'Since '+longDate(first.playedAt):'The table is waiting')+'</p>');
+    '<p class="isub rise d2">'+(first?'Since '+longDate(first.playedAt):'No games logged yet')+'</p>');
     T(function(){var e=$('icount');if(e)countUp(e,n,1300);},220);},5300);
-  T(function(){stageSwap('<div class="ik rise">Win rate</div><div class="irace">'+P.map(function(p){
+  T(function(){stageSwap('<div class="ik rise">Win percentage</div><div class="irace">'+P.map(function(p){
       return '<div class="irow rise'+(p==='malachi'?' d1':'')+'"><div class="lab"><span>'+cap(p)+'</span><b>'+pct(s[p].pct)+'</b></div>'+
       '<div class="itrack"><div class="ifill" data-w="'+s[p].pct+'" style="background:var(--'+p+')"></div></div>'+
       '<div class="meta">'+plural(s[p].w,'win')+(s[p].avg!==null?', avg '+s[p].avg.toFixed(1)+' balls left':'')+'</div></div>';}).join('')+'</div>');
     T(function(){document.querySelectorAll('.ifill').forEach(function(f){f.style.width=Math.max(f.dataset.w,2)+'%';});},380);},7300);
   T(function(){
-    if(cs&&cs.n>=2)stageSwap('<div class="ik rise">On a heater</div><div style="font-size:72px" class="slam">🔥</div>'+
-      '<h2 class="imid rise d1">'+cap(cs.p)+'</h2><p class="isub rise d2">'+cs.n+' straight wins and counting</p>');
-    else if(ex.best)stageSwap('<div class="ik rise">Most dominant win</div><div class="slam" style="display:inline-block">'+ballHTML(ex.best.winner,90)+'</div>'+
+    if(cs&&cs.n>=2)stageSwap('<div class="ik rise">Current form</div><div class="slam" style="display:inline-block">'+ballHTML(cs.p,90)+'</div>'+
+      '<h2 class="imid rise d1">'+cap(cs.p)+'</h2><p class="isub rise d2">'+cs.n+' consecutive wins</p>');
+    else if(ex.best)stageSwap('<div class="ik rise">Largest margin</div><div class="slam" style="display:inline-block">'+ballHTML(ex.best.winner,90)+'</div>'+
       '<h2 class="imid rise d1">'+cap(ex.best.winner)+'</h2><p class="isub rise d2">'+(ex.best.ballsLeft===0?cap(other(ex.best.winner))+' was on the 8':cap(other(ex.best.winner))+' still had '+plural(ex.best.ballsLeft,'ball')+' on the table')+'</p>');
-    else stageSwap('<div class="ik rise">Nobody\u2019s pulled ahead</div><div class="slam" style="display:inline-block">'+ballHTML('eight',90)+'</div><p class="isub rise d2">Anyone\u2019s season to take.</p>');
+    else stageSwap('<div class="ik rise">No leader yet</div><div class="slam" style="display:inline-block">'+ballHTML('eight',90)+'</div><p class="isub rise d2">The season is still open.</p>');
   },10500);
   T(function(){
-    if(!n){stageSwap('<div class="ik rise">No champion yet</div><h2 class="imid slam">Log a game<br>to start</h2>');return;}
-    if(!ld){stageSwap('<div class="ik rise">Dead even</div><h2 class="ibig slam">All<br>square</h2><p class="isub rise d2">'+s.linden.w+'–'+s.malachi.w+'. Somebody break the tie.</p>');return;}
-    stageSwap('<span class="crown">👑</span><div class="ik rise d1">League leader</div><h2 class="ibig slam">'+cap(ld)+'</h2>'+
-      '<p class="isub rise d2">'+pct(s[ld].pct)+' win rate, '+s[ld].w+'–'+s[ld].l+'</p>');
+    if(!n){stageSwap('<div class="ik rise">No leader yet</div><h2 class="imid slam">Log a game<br>to begin</h2>');return;}
+    if(!ld){stageSwap('<div class="ik rise">Level on standings</div><h2 class="ibig slam">All<br>square</h2><p class="isub rise d2">Tied at '+s.linden.w+'\u2013'+s.malachi.w+'.</p>');return;}
+    stageSwap('<span class="icrown">'+CROWN+'</span><div class="ik rise d1">League leader</div><h2 class="ibig slam">'+cap(ld)+'</h2>'+
+      '<p class="isub rise d2">'+pct3(s[ld].w,s[ld].t)+' win percentage, '+s[ld].w+'\u2013'+s[ld].l+'</p>');
     T(burst,250);
   },12500);
   T(function(){ov.classList.add('fade');},14650);
